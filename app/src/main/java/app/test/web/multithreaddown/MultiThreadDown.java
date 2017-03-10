@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.RandomAccessFile;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -21,7 +22,7 @@ import java.util.TimerTask;
 public class MultiThreadDown extends Activity {
 
     EditText edit1,edit2;
-    Button bn;
+    Button bn,bn2;
     ProgressBar progressBar;
     private int mDownStatus;
     DownUtil downUtil;
@@ -60,6 +61,7 @@ public class MultiThreadDown extends Activity {
         edit1=(EditText)findViewById(R.id.url);
         edit2=(EditText)findViewById(R.id.target);
         bn=(Button)findViewById(R.id.down);
+        bn2=(Button)findViewById(R.id.bn2);
         progressBar=(ProgressBar)findViewById(R.id.bar);
         textView=(TextView)findViewById(R.id.text);
         final Handler handler=new Handler(){
@@ -109,5 +111,40 @@ public class MultiThreadDown extends Activity {
                 }.start();
             }
         });
+        bn2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                insert(1024,"WQ DA BEN DAN !",edit2.getText().toString());
+            }
+        });
+    }
+
+    /**
+     *
+     * @param skip  跳过多少字节插入数据
+     * @param str  要插入的字符串
+     * @param fileName  文件路径
+     */
+    public static void insert(long skip,String str,String fileName){
+        try{
+            RandomAccessFile file=new RandomAccessFile(fileName,"rw");
+            if(skip<0 || skip>file.length()){
+                System.out.println("跳过的字节数无效！");
+                return;
+            }
+            byte[] b=str.getBytes();
+            file.setLength(file.length()+b.length);
+            for(long i=file.length()-1;i>b.length+skip-1;i--){
+                file.seek(i-b.length);
+                byte temp=file.readByte();
+                file.seek(i);
+                file.write(temp);
+            }
+            file.seek(skip);
+            file.write(b);
+            file.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
